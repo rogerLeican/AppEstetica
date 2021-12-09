@@ -16,7 +16,7 @@ public class ClientsViewModel extends ViewModel {
         mClients = new MutableLiveData<>();
     }
 
-    public LiveData<List<Client>> getText() {
+    public LiveData<List<Client>> getClients() {
         if (mClients == null){
             mClients = new MutableLiveData<>();
             loadClients();
