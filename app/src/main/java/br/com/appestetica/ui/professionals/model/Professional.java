@@ -1,7 +1,6 @@
 package br.com.appestetica.ui.professionals.model;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -20,4 +19,7 @@ public class Professional {
     private String telephone;
     private List<LocalDateTime> schedule;
 
+    public Professional(String name) {
+        this.name = name;
+    }
 }

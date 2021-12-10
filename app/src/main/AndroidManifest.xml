@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppEstetica">
         <activity
+            android:name=".ui.professionals.ProfessionalFormActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.clients.ClientFormActivity"
             android:exported="true" />
         <activity

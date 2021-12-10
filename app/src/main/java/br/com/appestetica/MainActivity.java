@@ -17,6 +17,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import br.com.appestetica.databinding.ActivityMainBinding;
 import br.com.appestetica.ui.clients.ClientFormActivity;
+import br.com.appestetica.ui.professionals.ProfessionalFormActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +44,11 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("action", "insert");
                     startActivity(intent);
                 }
+                if (menu.equals("Professionals")){
+                    Intent intent =  new Intent(MainActivity.this, ProfessionalFormActivity.class);
+                    intent.putExtra("action", "insert");
+                    startActivity(intent);
+                }
 
             }
         });
@@ -54,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home,
                 R.id.nav_clients,
-                R.id.nav_slideshow)
+                R.id.nav_slideshow,
+                R.id.nav_professionals)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);

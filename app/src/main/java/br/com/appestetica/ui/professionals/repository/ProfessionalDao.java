@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.appestetica.ui.DataBase;
 import br.com.appestetica.ui.professionals.model.Professional;
 import lombok.experimental.UtilityClass;
 
@@ -20,7 +21,7 @@ public class ProfessionalDao {
         values.put("name", professional.getName());
         values.put("telephone", professional.getTelephone());
 //      TODO COLOCAR LISTA DE DATA NO BANCO COM FIREBASE
-        ProfessionalDataBase connection = new ProfessionalDataBase(context);
+        DataBase connection = new DataBase(context);
         SQLiteDatabase database = connection.getWritableDatabase();
 
         database.insert(PROFESSIONAL_TABLE, null, values);
@@ -32,7 +33,7 @@ public class ProfessionalDao {
         values.put("name", professional.getName());
         values.put("telephone", professional.getTelephone());
         //      TODO COLOCAR LISTA DE DATA NO BANCO COM FIREBASE
-        ProfessionalDataBase connection = new ProfessionalDataBase(context);
+        DataBase connection = new DataBase(context);
         SQLiteDatabase database = connection.getWritableDatabase();
 
         database.update(PROFESSIONAL_TABLE, values, "id = " + professional.getId(), null);
@@ -41,7 +42,7 @@ public class ProfessionalDao {
 
     public static void delete(Context context, int idProfessional) {
 
-        ProfessionalDataBase connection = new ProfessionalDataBase(context);
+        DataBase connection = new DataBase(context);
         SQLiteDatabase database = connection.getWritableDatabase();
 
         database.delete(PROFESSIONAL_TABLE, "id = " + idProfessional, null);
@@ -50,10 +51,10 @@ public class ProfessionalDao {
     public static List<Professional> getProfessionals(Context context) {
         List<Professional> list = new ArrayList<>();
 
-        ProfessionalDataBase connection = new ProfessionalDataBase(context);
+        DataBase connection = new DataBase(context);
         SQLiteDatabase database = connection.getReadableDatabase();
 
-        try (Cursor cursor = database.rawQuery("SELECT * FROM " + PROFESSIONAL_TABLE + " ORDER BY id", null)) {
+        try (Cursor cursor = database.rawQuery("SELECT * FROM professionals ORDER BY id", null)) {
             if (cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 do {
@@ -71,10 +72,10 @@ public class ProfessionalDao {
 
     public static Professional getProfessionalById(Context context, int professionalId) {
 
-        ProfessionalDataBase connection = new ProfessionalDataBase(context);
+        DataBase connection = new DataBase(context);
         SQLiteDatabase database = connection.getReadableDatabase();
 
-        try (Cursor cursor = database.rawQuery("SELECT * FROM " + PROFESSIONAL_TABLE + " WHERE id = " + professionalId, null)) {
+        try (Cursor cursor = database.rawQuery("SELECT * FROM professionals WHERE id = " + professionalId, null)) {
             if (cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 Professional professional = new Professional();
