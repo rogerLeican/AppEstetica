@@ -12,10 +12,16 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="br.com.appestetica.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_clients"
+        android:name="br.com.appestetica.ui.clients.ClientsFragment"
+        android:label="@string/menu_clients"
+        tools:layout="@layout/fragment_clients" />
+
+    <fragment
+        android:id="@+id/nav_professionals"
+        android:name="br.com.appestetica.ui.professionals.ProfessionalsFragment"
+        android:label="@string/menu_professionals"
+        tools:layout="@layout/fragment_professionals" />
 
     <fragment
         android:id="@+id/nav_slideshow"
