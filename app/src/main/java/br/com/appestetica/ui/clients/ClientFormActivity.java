@@ -6,26 +6,33 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import br.com.appestetica.databinding.ClientActivityFormBinding;
 import br.com.appestetica.ui.clients.model.Client;
-import br.com.appestetica.ui.clients.repository.ClientDao;
 
 public class ClientFormActivity extends AppCompatActivity {
 
-    ClientActivityFormBinding binding;
-    Button btnSave;
-    EditText editTextName;
-    EditText editTexTelephone;
-    EditText editTextEmail;
+    private EditText editTextName;
+    private EditText editTexTelephone;
+    private EditText editTextEmail;
     private Client client;
+    private FirebaseDatabase database;
+    private DatabaseReference reference;
+    private static final String CLIENTS_COLLECTION_NAME = "clients";
+
+    ClientActivityFormBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ClientActivityFormBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference("/aesthetic");
 
-        btnSave = binding.btnSaveClient;
+        Button btnSave = binding.btnSaveClient;
         editTextName = binding.etClientName;
         editTexTelephone = binding.etClientPhone;
         editTextEmail = binding.etClientEmail;
@@ -51,7 +58,7 @@ public class ClientFormActivity extends AppCompatActivity {
         client.setName(name);
         client.setTelephone(telephone);
         client.setEmail(email);
-        ClientDao.insert(this, client);
+        reference.child(CLIENTS_COLLECTION_NAME).push().setValue(client);
         editTextName.setText("");
         editTexTelephone.setText("");
         editTextEmail.setText("");
@@ -62,14 +69,13 @@ public class ClientFormActivity extends AppCompatActivity {
         String telephone = editTexTelephone.getText().toString();
         client.setName(name);
         client.setTelephone(telephone);
-        ClientDao.update(this, client);
+        reference.child(CLIENTS_COLLECTION_NAME).child(client.getId())
+                .setValue(client);
         finish();
     }
 
     private void loadForm() {
-
-        int idClient = getIntent().getIntExtra("idClient", 0);
-        client = ClientDao.getClientById(this, idClient);
+        String idClient = getIntent().getStringExtra("idClient");
         editTextName.setText(client.getName());
         editTexTelephone.setText(client.getTelephone());
         editTextEmail.setText(client.getEmail());

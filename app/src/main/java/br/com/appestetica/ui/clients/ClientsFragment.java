@@ -13,11 +13,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import br.com.appestetica.databinding.FragmentClientsBinding;
 import br.com.appestetica.ui.clients.model.Client;
-import br.com.appestetica.ui.clients.repository.ClientDao;
 
 public class ClientsFragment extends Fragment {
 
@@ -42,7 +42,7 @@ public class ClientsFragment extends Fragment {
 
         lvClients.setOnItemClickListener((adapterView, view, position, l) -> {
             Intent intent = new Intent(getContext(), ClientFormActivity.class);
-            int idClient = listOfClients.get(position).getId();
+            String idClient = listOfClients.get(position).getId();
             intent.putExtra("action", "update");
             intent.putExtra("idClient", idClient);
             startActivity(intent);
@@ -69,15 +69,13 @@ public class ClientsFragment extends Fragment {
         alert.setMessage("confirm " + client.getName() + " client deletion ?");
         alert.setNeutralButton("CANCEL", null);
         alert.setPositiveButton("YES", (dialogInterface, i) -> {
-            ClientDao.delete(getContext(), client.getId());
             loadClients(lvClients);
         });
         alert.show();
     }
 
     private void loadClients(ListView lvAccounts) {
-        listOfClients = ClientDao.getClients(getContext());
-
+        listOfClients = new ArrayList<>();
         if (listOfClients.isEmpty()) {
             Client fake = new Client("Empty list...");
             listOfClients.add(fake);
