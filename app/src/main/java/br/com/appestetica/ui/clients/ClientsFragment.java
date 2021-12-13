@@ -1,5 +1,8 @@
 package br.com.appestetica.ui.clients;
 
+import static br.com.appestetica.commons.UtilityNamesDataBase.CLIENTS_COLLECTION_NAME;
+import static br.com.appestetica.commons.UtilityNamesDataBase.URI_DATABASE_AESTHETIC;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,9 +12,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,24 +38,37 @@ public class ClientsFragment extends Fragment {
     private ArrayAdapter adapter;
     private ListView lvClients;
 
+    private FirebaseDatabase database;
+    private DatabaseReference reference;
+    private ChildEventListener eventListener;
+    private Query query;
+
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        listOfClients = new ArrayList<>();
         clientsViewModel =
                 new ViewModelProvider(this).get(ClientsViewModel.class);
 
         binding = FragmentClientsBinding.inflate(inflater, container, false);
 
         lvClients = binding.lvClients;
-        loadClients(lvClients);
 
         View root = binding.getRoot();
 
+        adapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, listOfClients);
+        lvClients.setAdapter(adapter);
+
         lvClients.setOnItemClickListener((adapterView, view, position, l) -> {
             Intent intent = new Intent(getContext(), ClientFormActivity.class);
-            String idClient = listOfClients.get(position).getId();
+            Client clientSelected = listOfClients.get(position);
             intent.putExtra("action", "update");
-            intent.putExtra("idClient", idClient);
+            intent.putExtra("idClient", clientSelected.getId());
+            intent.putExtra("name", clientSelected.getName());
+            intent.putExtra("telephone", clientSelected.getTelephone());
+            intent.putExtra("email", clientSelected.getEmail());
             startActivity(intent);
         });
 
@@ -69,30 +93,82 @@ public class ClientsFragment extends Fragment {
         alert.setMessage("confirm " + client.getName() + " client deletion ?");
         alert.setNeutralButton("CANCEL", null);
         alert.setPositiveButton("YES", (dialogInterface, i) -> {
-            loadClients(lvClients);
+
+            reference.child(CLIENTS_COLLECTION_NAME).child(client.getId()).removeValue();
         });
         alert.show();
     }
 
-    private void loadClients(ListView lvAccounts) {
-        listOfClients = new ArrayList<>();
-        if (listOfClients.isEmpty()) {
-            Client fake = new Client("Empty list...");
-            listOfClients.add(fake);
-            lvAccounts.setEnabled(false);
-        }
+    private void loadClients() {
 
-        lvAccounts.setEnabled(true);
-        adapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_list_item_1, listOfClients);
+        listOfClients.clear();
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference(URI_DATABASE_AESTHETIC);
+        query = reference.child(CLIENTS_COLLECTION_NAME).orderByChild("name");
 
-        lvAccounts.setAdapter(adapter);
+        eventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Client client= new Client();
+                client.setId(snapshot.getKey());
+                client.setName(snapshot.child("name").getValue(String.class));
+                client.setTelephone(snapshot.child("telephone").getValue(String.class));
+                client.setEmail(snapshot.child("email").getValue(String.class));
+
+                listOfClients.add(client);
+                adapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                String idClient = snapshot.getKey();
+                for (Client client : listOfClients){
+                    if(client.getId().equals(idClient)){
+                        client.setName(snapshot.child("name").getValue(String.class));
+                        client.setTelephone(snapshot.child("telephone").getValue(String.class));
+                        client.setTelephone(snapshot.child("email").getValue(String.class));
+                        adapter.notifyDataSetChanged();
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                String idClient = snapshot.getKey();
+                listOfClients.removeIf(client -> client.getId().equals(idClient));
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+        query.addChildEventListener(eventListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        query.removeEventListener(eventListener);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        loadClients(lvClients);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        loadClients();
     }
 
     @Override
