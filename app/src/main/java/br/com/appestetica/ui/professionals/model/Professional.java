@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Professional {
 
-    private int id;
+    private String id;
     private String name;
     private String telephone;
     private List<LocalDateTime> schedule;

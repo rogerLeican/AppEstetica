@@ -6,17 +6,20 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import br.com.appestetica.R;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import br.com.appestetica.databinding.ActivityProfessionalFormBinding;
 import br.com.appestetica.ui.professionals.model.Professional;
-import br.com.appestetica.ui.professionals.repository.ProfessionalDao;
 
 public class ProfessionalFormActivity extends AppCompatActivity {
 
-    Button btnSave;
-    EditText editTextName;
-    EditText editTexTelephone;
+    private EditText editTextName;
+    private EditText editTexTelephone;
     private Professional professional;
+    private FirebaseDatabase database;
+    private DatabaseReference reference;
+    private static final String PROFESSIONALS_COLLECTION_NAME = "professionals";
 
     ActivityProfessionalFormBinding binding;
 
@@ -25,8 +28,10 @@ public class ProfessionalFormActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityProfessionalFormBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference("/aesthetic");
 
-        btnSave = binding.btnSaveProfessional;
+        Button btnSave = binding.btnSaveProfessional;
         editTextName = binding.etProfessionalName;
         editTexTelephone = binding.etProfessionalPhone;
         String action = getIntent().getStringExtra("action");
@@ -44,30 +49,36 @@ public class ProfessionalFormActivity extends AppCompatActivity {
         });
     }
 
-    private void update() {
-        String name = editTextName.getText().toString();
-        String telephone = editTexTelephone.getText().toString();
-        professional.setName(name);
-        professional.setTelephone(telephone);
-        ProfessionalDao.update(this, professional);
-        finish();
-    }
-
     private void save() {
         String name = editTextName.getText().toString();
         String telephone = editTexTelephone.getText().toString();
         professional = new Professional();
         professional.setName(name);
         professional.setTelephone(telephone);
-       ProfessionalDao.insert(this, professional);
+        reference.child(PROFESSIONALS_COLLECTION_NAME).push().setValue(professional);
         editTextName.setText("");
         editTexTelephone.setText("");
     }
 
+    private void update() {
+        String name = editTextName.getText().toString();
+        String telephone = editTexTelephone.getText().toString();
+        professional.setName(name);
+        professional.setTelephone(telephone);
+        reference.child(PROFESSIONALS_COLLECTION_NAME).child(professional.getId())
+                .setValue(professional);
+        finish();
+    }
+
     private void loadForm() {
-        int idProfessional = getIntent().getIntExtra("idProfessional", 0);
-        professional = ProfessionalDao.getProfessionalById(this, idProfessional);
+        String idProfessional = getIntent().getStringExtra("idProfessional");
         editTextName.setText(professional.getName());
         editTexTelephone.setText(professional.getTelephone());
     }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+    }
+
 }
