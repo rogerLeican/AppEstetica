@@ -1,8 +1,11 @@
 package br.com.appestetica.ui.professionals;
 
+import static br.com.appestetica.commons.UtilityNamesDataBase.URI_DATABASE_AESTHETIC;
+
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,7 +32,7 @@ public class ProfessionalFormActivity extends AppCompatActivity {
         binding = ActivityProfessionalFormBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         database = FirebaseDatabase.getInstance();
-        reference = database.getReference("/aesthetic");
+        reference = database.getReference(URI_DATABASE_AESTHETIC);
 
         Button btnSave = binding.btnSaveProfessional;
         editTextName = binding.etProfessionalName;
@@ -52,17 +55,30 @@ public class ProfessionalFormActivity extends AppCompatActivity {
     private void save() {
         String name = editTextName.getText().toString();
         String telephone = editTexTelephone.getText().toString();
-        professional = new Professional();
-        professional.setName(name);
-        professional.setTelephone(telephone);
-        reference.child(PROFESSIONALS_COLLECTION_NAME).push().setValue(professional);
-        editTextName.setText("");
-        editTexTelephone.setText("");
+
+        if (name.isEmpty() || telephone.isEmpty()) {
+            Toast.makeText(this, "You must fill in all fields!", Toast.LENGTH_LONG).show();
+        } else {
+
+
+            professional = new Professional();
+            professional.setName(name);
+            professional.setTelephone(telephone);
+            reference.child(PROFESSIONALS_COLLECTION_NAME).push().setValue(professional);
+            Toast.makeText(this,
+                    "The professional " + professional.getName() + " was successfully registered",
+                    Toast.LENGTH_LONG)
+                    .show();
+            editTextName.setText("");
+            editTexTelephone.setText("");
+        }
     }
 
     private void update() {
+        String idProfessional = getIntent().getStringExtra("idProfessional");
         String name = editTextName.getText().toString();
         String telephone = editTexTelephone.getText().toString();
+        professional.setId(idProfessional);
         professional.setName(name);
         professional.setTelephone(telephone);
         reference.child(PROFESSIONALS_COLLECTION_NAME).child(professional.getId())
@@ -71,7 +87,11 @@ public class ProfessionalFormActivity extends AppCompatActivity {
     }
 
     private void loadForm() {
-        String idProfessional = getIntent().getStringExtra("idProfessional");
+        professional = Professional.builder()
+                .id(getIntent().getStringExtra("idProfessional"))
+                .name(getIntent().getStringExtra("name"))
+                .telephone(getIntent().getStringExtra("telephone"))
+                .build();
         editTextName.setText(professional.getName());
         editTexTelephone.setText(professional.getTelephone());
     }

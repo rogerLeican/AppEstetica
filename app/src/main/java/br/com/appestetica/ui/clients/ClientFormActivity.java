@@ -58,7 +58,7 @@ public class ClientFormActivity extends AppCompatActivity {
         String telephone = editTexTelephone.getText().toString();
         String email = editTextEmail.getText().toString();
         if (name.isEmpty() || telephone.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Você deve preencher todos os campos!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "You must fill in all fields!", Toast.LENGTH_LONG).show();
         } else {
 
             client = new Client();
@@ -66,6 +66,10 @@ public class ClientFormActivity extends AppCompatActivity {
             client.setTelephone(telephone);
             client.setEmail(email);
             reference.child(CLIENTS_COLLECTION_NAME).push().setValue(client);
+            Toast.makeText(this,
+                    "The client " + client.getName() + " was successfully registered",
+                    Toast.LENGTH_LONG)
+                    .show();
             editTextName.setText("");
             editTexTelephone.setText("");
             editTextEmail.setText("");
