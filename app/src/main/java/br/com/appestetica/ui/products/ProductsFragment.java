@@ -1,6 +1,6 @@
-package br.com.appestetica.ui.clients;
+package br.com.appestetica.ui.products;
 
-import static br.com.appestetica.commons.UtilityNamesDataBase.CLIENTS_COLLECTION_NAME;
+import static br.com.appestetica.commons.UtilityNamesDataBase.PRODUCTS_COLLECTION_NAME;
 import static br.com.appestetica.commons.UtilityNamesDataBase.URI_DATABASE_AESTHETIC;
 
 import android.content.Intent;
@@ -24,110 +24,101 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.appestetica.databinding.FragmentClientsBinding;
-import br.com.appestetica.ui.clients.model.Client;
+import br.com.appestetica.databinding.FragmentProductsBinding;
+import br.com.appestetica.ui.products.model.Product;
 
-public class ClientsFragment extends Fragment {
+public class ProductsFragment extends Fragment {
 
-    private ClientsViewModel clientsViewModel;
-    private FragmentClientsBinding binding;
-    private List<Client> listOfClients;
+    private ProductsViewModel productsViewModel;
+    private FragmentProductsBinding binding;
+
+    private List<Product> listOfProducts;
     private ArrayAdapter adapter;
-    private ListView lvClients;
+    private ListView lvProducts;
 
     private FirebaseDatabase database;
     private DatabaseReference reference;
     private ChildEventListener eventListener;
     private Query query;
 
-
-    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        listOfClients = new ArrayList<>();
-        clientsViewModel =
-                new ViewModelProvider(this).get(ClientsViewModel.class);
+        listOfProducts = new ArrayList<>();
 
-        binding = FragmentClientsBinding.inflate(inflater, container, false);
+        productsViewModel =
+                new ViewModelProvider(this).get(ProductsViewModel.class);
 
-        lvClients = binding.lvClients;
+        binding = FragmentProductsBinding.inflate(inflater, container, false);
+
+        lvProducts = binding.lvProducts;
 
         View root = binding.getRoot();
 
         adapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_list_item_1, listOfClients);
-        lvClients.setAdapter(adapter);
+                android.R.layout.simple_list_item_1, listOfProducts);
+        lvProducts.setAdapter(adapter);
 
-        lvClients.setOnItemClickListener((adapterView, view, position, l) -> {
-            Intent intent = new Intent(getContext(), ClientFormActivity.class);
-            Client clientSelected = listOfClients.get(position);
+        lvProducts.setOnItemClickListener((adapterView, view, position, l) -> {
+            Intent intent = new Intent(getContext(), ProductsFormActivity.class);
+            Product productSelected = listOfProducts.get(position);
             intent.putExtra("action", "update");
-            intent.putExtra("idClient", clientSelected.getId());
-            intent.putExtra("name", clientSelected.getName());
-            intent.putExtra("telephone", clientSelected.getTelephone());
-            intent.putExtra("email", clientSelected.getEmail());
+            intent.putExtra("idProduct", productSelected.getId());
+            intent.putExtra("name", productSelected.getName());
+            intent.putExtra("price", productSelected.getPrice());
             startActivity(intent);
         });
 
-        lvClients.setOnItemLongClickListener((adapterView, view, position, l) -> {
+        lvProducts.setOnItemLongClickListener((adapterView, view, position, l) -> {
             delete(position);
             return false;
         });
-
-
-//        clientsViewModel.getClients().observe(getViewLifecycleOwner(), clients -> {
-////            listView Todo revisar
-//        });
 
         return root;
     }
 
     private void delete(int position) {
-        Client client = listOfClients.get(position);
+        Product product = listOfProducts.get(position);
         AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
         alert.setTitle("Delete...");
         alert.setIcon(android.R.drawable.ic_delete);
-        alert.setMessage("confirm " + client.getName() + " client deletion ?");
+        alert.setMessage("confirm " + product.getName() + " product deletion ?");
         alert.setNeutralButton("CANCEL", null);
         alert.setPositiveButton("YES", (dialogInterface, i) -> {
 
-            reference.child(CLIENTS_COLLECTION_NAME).child(client.getId()).removeValue();
+            reference.child(PRODUCTS_COLLECTION_NAME).child(product.getId())
+                    .removeValue();
         });
         alert.show();
     }
 
-    private void loadClients() {
-
-        listOfClients.clear();
+    private void loadProducts() {
+        listOfProducts.clear();
         database = FirebaseDatabase.getInstance();
         reference = database.getReference(URI_DATABASE_AESTHETIC);
-        query = reference.child(CLIENTS_COLLECTION_NAME).orderByChild("name");
-
+        query = reference.child(PRODUCTS_COLLECTION_NAME).orderByChild("name");
         eventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Client client= new Client();
-                client.setId(snapshot.getKey());
-                client.setName(snapshot.child("name").getValue(String.class));
-                client.setTelephone(snapshot.child("telephone").getValue(String.class));
-                client.setEmail(snapshot.child("email").getValue(String.class));
+                Product product = new Product();
+                product.setId(snapshot.getKey());
+                product.setName(snapshot.child("name").getValue(String.class));
+                product.setPrice(snapshot.child("price").getValue(Float.class));
 
-                listOfClients.add(client);
+                listOfProducts.add(product);
                 adapter.notifyDataSetChanged();
-
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String idClient = snapshot.getKey();
-                for (Client client : listOfClients){
-                    if(client.getId().equals(idClient)){
-                        client.setName(snapshot.child("name").getValue(String.class));
-                        client.setTelephone(snapshot.child("telephone").getValue(String.class));
-                        client.setEmail(snapshot.child("email").getValue(String.class));
+                String idProduct = snapshot.getKey();
+                for (Product product : listOfProducts) {
+                    if (product.getId().equals(idProduct)) {
+                        product.setName(snapshot.child("name").getValue(String.class));
+                        product.setPrice(snapshot.child("price").getValue(Float.class));
                         adapter.notifyDataSetChanged();
                         break;
                     }
@@ -136,8 +127,8 @@ public class ClientsFragment extends Fragment {
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                String idClient = snapshot.getKey();
-                listOfClients.removeIf(client -> client.getId().equals(idClient));
+                String idProduct = snapshot.getKey();
+                listOfProducts.removeIf(product -> product.getId().equals(idProduct));
                 adapter.notifyDataSetChanged();
             }
 
@@ -161,14 +152,9 @@ public class ClientsFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
-        loadClients();
+        loadProducts();
     }
 
     @Override

@@ -6,16 +6,16 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/shop_595b40b65ba036ed117d1633"
             android:title="@string/menu_home" />
         <item
             android:id="@+id/nav_clients"
             android:icon="@drawable/add_user_group_woman_man"
             android:title="@string/menu_clients" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/menu_slideshow" />
+            android:id="@+id/nav_products"
+            android:icon="@drawable/syringe_595b40b65ba036ed117d1697"
+            android:title="@string/menu_products" />
         <item
             android:id="@+id/nav_professionals"
             android:icon="@drawable/doctor_female"
