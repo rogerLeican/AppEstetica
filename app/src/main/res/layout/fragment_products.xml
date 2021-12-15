@@ -6,9 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".ui.products.ProductsFragment">
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="60dp"
-        android:id="@+id/lvProducts"/>
+        android:id="@+id/rvProducts"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
