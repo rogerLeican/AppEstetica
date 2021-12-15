@@ -107,7 +107,7 @@ public class ProfessionalsFragment extends Fragment {
 
             Drawable icon = ContextCompat.getDrawable(adapter.getContext(),
                     R.drawable.ic_baseline_delete_sweep_40);
-            ColorDrawable background = new ColorDrawable(getResources().getColor(R.color.colorAccentVariant, getActivity().getTheme()));
+            ColorDrawable background = new ColorDrawable(getResources().getColor(R.color.colorAccent, getActivity().getTheme()));
 
             View itemView = viewHolder.itemView;
             int backgroundCornerOffset = 20; //so background is behind the rounded corners of itemView
