@@ -8,10 +8,10 @@
     tools:context=".ui.professionals.ProfessionalsFragment">
 
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="60dp"
-        android:id="@+id/lvProfessionals"/>
+        android:id="@+id/rvProfessionals"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

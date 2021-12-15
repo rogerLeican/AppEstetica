@@ -135,7 +135,7 @@ public class ClientsFragment extends Fragment {
         }
     };
 
-    public void viewData() {
+    private void viewData() {
 
         rvClients = binding.rvClients;
         rvClients.setLayoutManager(new LinearLayoutManager(getContext()));

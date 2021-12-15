@@ -1,5 +1,6 @@
 package br.com.appestetica.ui.professionals;
 
+import static br.com.appestetica.commons.UtilityNamesDataBase.PROFESSIONALS_COLLECTION_NAME;
 import static br.com.appestetica.commons.UtilityNamesDataBase.URI_DATABASE_AESTHETIC;
 
 import android.os.Bundle;
@@ -22,7 +23,6 @@ public class ProfessionalFormActivity extends AppCompatActivity {
     private Professional professional;
     private FirebaseDatabase database;
     private DatabaseReference reference;
-    private static final String PROFESSIONALS_COLLECTION_NAME = "professionals";
 
     ActivityProfessionalFormBinding binding;
 
