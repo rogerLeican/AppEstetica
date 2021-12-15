@@ -38,6 +38,10 @@ public class AdapterClients extends RecyclerView.Adapter<AdapterClients.ViewHold
         this.listOfClients = listOfClients;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
     @NonNull
     @Override
     public AdapterClients.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

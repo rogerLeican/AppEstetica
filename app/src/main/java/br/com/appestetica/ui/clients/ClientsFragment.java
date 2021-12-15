@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +17,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,9 +28,9 @@ import com.google.firebase.database.Query;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.appestetica.R;
 import br.com.appestetica.databinding.FragmentClientsBinding;
 import br.com.appestetica.ui.clients.adapter.AdapterClients;
-import br.com.appestetica.ui.clients.adapter.SwipeToDeleteCallback;
 import br.com.appestetica.ui.clients.model.Client;
 
 public class ClientsFragment extends Fragment {
@@ -38,8 +38,6 @@ public class ClientsFragment extends Fragment {
     private ClientsViewModel clientsViewModel;
     private FragmentClientsBinding binding;
     private List<Client> listOfClients;
-//    private ArrayAdapter adapter;
-//    private ListView lvClients;
     private RecyclerView rvClients;
     AdapterClients adapter;
 
@@ -60,36 +58,40 @@ public class ClientsFragment extends Fragment {
         View root = binding.getRoot();
         viewData();
 
-
-//        lvClients.setOnItemClickListener((adapterView, view, position, l) -> {
-//            Intent intent = new Intent(getContext(), ClientFormActivity.class);
-//            Client clientSelected = listOfClients.get(position);
-//            intent.putExtra("action", "update");
-//            intent.putExtra("idClient", clientSelected.getId());
-//            intent.putExtra("name", clientSelected.getName());
-//            intent.putExtra("telephone", clientSelected.getTelephone());
-//            intent.putExtra("email", clientSelected.getEmail());
-//            startActivity(intent);
-//        });
-
-//        lvClients.setOnItemLongClickListener((adapterView, view, position, l) -> {
-//            delete(position);
-//            return false;
-//        });
-
-//        rvClients.setOnItemLongClickListener((adapterView, view, position, l) -> {
-//            delete(position);
-//            return false;
-//        });
-
-
-//        clientsViewModel.getClients().observe(getViewLifecycleOwner(), clients -> {
-////            listView Todo revisar
-//        });
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(rvClients);
 
         return root;
     }
 
+    Client deleteClients = null;
+    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0,
+            ItemTouchHelper.RIGHT) {
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
+                              @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+
+            switch (direction) {
+                case ItemTouchHelper.RIGHT:
+                    deleteClients = listOfClients.get(position);
+                    delete(position);
+                    adapter.notifyItemRemoved(position);
+                    Snackbar.make(rvClients, deleteClients.toString(), Snackbar.LENGTH_LONG)
+                            .setAction("Undo", view -> {
+                                listOfClients.add(position, deleteClients);
+                                reference.child(CLIENTS_COLLECTION_NAME).push().setValue(deleteClients);
+                            }).show();
+                    break;
+            }
+        }
+    };
 
     public void viewData() {
 
@@ -104,8 +106,8 @@ public class ClientsFragment extends Fragment {
         Client client = listOfClients.get(position);
         AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
         alert.setTitle("Delete...");
-        alert.setIcon(android.R.drawable.ic_delete);
-        alert.setMessage("confirm " + client.getName() + " client deletion ?");
+        alert.setIcon(R.drawable.ic_baseline_cancel_24);
+        alert.setMessage("Confirm " + client.getName() + " client deletion ?");
         alert.setNeutralButton("CANCEL", null);
         alert.setPositiveButton("YES", (dialogInterface, i) -> {
 
@@ -124,7 +126,7 @@ public class ClientsFragment extends Fragment {
         eventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Client client= new Client();
+                Client client = new Client();
                 client.setId(snapshot.getKey());
                 client.setName(snapshot.child("name").getValue(String.class));
                 client.setTelephone(snapshot.child("telephone").getValue(String.class));
@@ -138,8 +140,8 @@ public class ClientsFragment extends Fragment {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 String idClient = snapshot.getKey();
-                for (Client client : listOfClients){
-                    if(client.getId().equals(idClient)){
+                for (Client client : listOfClients) {
+                    if (client.getId().equals(idClient)) {
                         client.setName(snapshot.child("name").getValue(String.class));
                         client.setTelephone(snapshot.child("telephone").getValue(String.class));
                         client.setEmail(snapshot.child("email").getValue(String.class));
