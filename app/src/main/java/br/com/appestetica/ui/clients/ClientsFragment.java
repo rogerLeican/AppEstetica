@@ -3,12 +3,10 @@ package br.com.appestetica.ui.clients;
 import static br.com.appestetica.commons.UtilityNamesDataBase.CLIENTS_COLLECTION_NAME;
 import static br.com.appestetica.commons.UtilityNamesDataBase.URI_DATABASE_AESTHETIC;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +14,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.appestetica.databinding.FragmentClientsBinding;
+import br.com.appestetica.ui.clients.adapter.AdapterClients;
+import br.com.appestetica.ui.clients.adapter.SwipeToDeleteCallback;
 import br.com.appestetica.ui.clients.model.Client;
 
 public class ClientsFragment extends Fragment {
@@ -35,8 +38,10 @@ public class ClientsFragment extends Fragment {
     private ClientsViewModel clientsViewModel;
     private FragmentClientsBinding binding;
     private List<Client> listOfClients;
-    private ArrayAdapter adapter;
-    private ListView lvClients;
+//    private ArrayAdapter adapter;
+//    private ListView lvClients;
+    private RecyclerView rvClients;
+    AdapterClients adapter;
 
     private FirebaseDatabase database;
     private DatabaseReference reference;
@@ -52,30 +57,30 @@ public class ClientsFragment extends Fragment {
                 new ViewModelProvider(this).get(ClientsViewModel.class);
 
         binding = FragmentClientsBinding.inflate(inflater, container, false);
-
-        lvClients = binding.lvClients;
-
         View root = binding.getRoot();
+        viewData();
 
-        adapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_list_item_1, listOfClients);
-        lvClients.setAdapter(adapter);
 
-        lvClients.setOnItemClickListener((adapterView, view, position, l) -> {
-            Intent intent = new Intent(getContext(), ClientFormActivity.class);
-            Client clientSelected = listOfClients.get(position);
-            intent.putExtra("action", "update");
-            intent.putExtra("idClient", clientSelected.getId());
-            intent.putExtra("name", clientSelected.getName());
-            intent.putExtra("telephone", clientSelected.getTelephone());
-            intent.putExtra("email", clientSelected.getEmail());
-            startActivity(intent);
-        });
+//        lvClients.setOnItemClickListener((adapterView, view, position, l) -> {
+//            Intent intent = new Intent(getContext(), ClientFormActivity.class);
+//            Client clientSelected = listOfClients.get(position);
+//            intent.putExtra("action", "update");
+//            intent.putExtra("idClient", clientSelected.getId());
+//            intent.putExtra("name", clientSelected.getName());
+//            intent.putExtra("telephone", clientSelected.getTelephone());
+//            intent.putExtra("email", clientSelected.getEmail());
+//            startActivity(intent);
+//        });
 
-        lvClients.setOnItemLongClickListener((adapterView, view, position, l) -> {
-            delete(position);
-            return false;
-        });
+//        lvClients.setOnItemLongClickListener((adapterView, view, position, l) -> {
+//            delete(position);
+//            return false;
+//        });
+
+//        rvClients.setOnItemLongClickListener((adapterView, view, position, l) -> {
+//            delete(position);
+//            return false;
+//        });
 
 
 //        clientsViewModel.getClients().observe(getViewLifecycleOwner(), clients -> {
@@ -83,6 +88,16 @@ public class ClientsFragment extends Fragment {
 //        });
 
         return root;
+    }
+
+
+    public void viewData() {
+
+        rvClients = binding.rvClients;
+        rvClients.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvClients.setHasFixedSize(true);
+        adapter = new AdapterClients(getContext(), listOfClients);
+        rvClients.setAdapter(adapter);
     }
 
     private void delete(int position) {

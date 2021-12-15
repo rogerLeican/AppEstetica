@@ -53,6 +53,8 @@ public class ClientFormActivity extends AppCompatActivity {
         });
     }
 
+
+
     private void save() {
         String name = editTextName.getText().toString();
         String telephone = editTexTelephone.getText().toString();
