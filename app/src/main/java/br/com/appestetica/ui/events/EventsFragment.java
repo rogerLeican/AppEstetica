@@ -1,6 +1,6 @@
-package br.com.appestetica.ui.clients;
+package br.com.appestetica.ui.events;
 
-import static br.com.appestetica.commons.UtilityNamesDataBase.CLIENTS_COLLECTION_NAME;
+import static br.com.appestetica.commons.UtilityNamesDataBase.EVENTS_COLLECTION_NAME;
 import static br.com.appestetica.commons.UtilityNamesDataBase.URI_DATABASE_AESTHETIC;
 
 import android.graphics.Canvas;
@@ -16,7 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,42 +32,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.appestetica.R;
-import br.com.appestetica.databinding.FragmentClientsBinding;
-import br.com.appestetica.ui.clients.adapter.AdapterClients;
-import br.com.appestetica.ui.clients.model.Client;
+import br.com.appestetica.databinding.FragmentEventsBinding;
+import br.com.appestetica.ui.events.adapter.AdapterEvents;
+import br.com.appestetica.ui.events.model.Event;
 
-public class ClientsFragment extends Fragment {
 
-    private ClientsViewModel clientsViewModel;
-    private FragmentClientsBinding binding;
-    private List<Client> listOfClients;
-    private RecyclerView rvClients;
-    private AdapterClients adapter;
+public class EventsFragment extends Fragment {
+
+
+    private FragmentEventsBinding binding;
+    private List<Event> listOfEvents;
+    private RecyclerView rvEvent;
+    private AdapterEvents adapter;
 
     private FirebaseDatabase database;
     private DatabaseReference reference;
     private ChildEventListener eventListener;
     private Query query;
 
-
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        listOfClients = new ArrayList<>();
-        clientsViewModel =
-                new ViewModelProvider(this).get(ClientsViewModel.class);
-
-        binding = FragmentClientsBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        listOfEvents = new ArrayList<>();
+        binding = FragmentEventsBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         viewData();
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-        itemTouchHelper.attachToRecyclerView(rvClients);
+        itemTouchHelper.attachToRecyclerView(rvEvent);
 
-        return root;
+        return view;
     }
 
-    Client deleteClients = null;
+    Event deleteEvents = null;
     ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0,
             ItemTouchHelper.RIGHT) {
 
@@ -84,13 +80,13 @@ public class ClientsFragment extends Fragment {
 
             switch (direction) {
                 case ItemTouchHelper.RIGHT:
-                    deleteClients = listOfClients.get(position);
+                    deleteEvents = listOfEvents.get(position);
                     delete(position);
                     adapter.notifyItemRemoved(position);
-                    Snackbar.make(rvClients, deleteClients.toString(), Snackbar.LENGTH_LONG)
+                    Snackbar.make(rvEvent, deleteEvents.toString(), Snackbar.LENGTH_LONG)
                             .setAction("Undo", view -> {
-                                listOfClients.add(position, deleteClients);
-                                reference.child(CLIENTS_COLLECTION_NAME).push().setValue(deleteClients);
+                                listOfEvents.add(position, deleteEvents);
+                                reference.child(EVENTS_COLLECTION_NAME).push().setValue(deleteEvents);
                             }).show();
                     break;
             }
@@ -136,57 +132,56 @@ public class ClientsFragment extends Fragment {
     };
 
     private void viewData() {
-
-        rvClients = binding.rvClients;
-        rvClients.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvClients.setHasFixedSize(true);
-        adapter = new AdapterClients(getContext(), listOfClients);
-        rvClients.setAdapter(adapter);
+        rvEvent = binding.rvEvents;
+        rvEvent.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvEvent.setHasFixedSize(true);
+        adapter = new AdapterEvents(getContext(), listOfEvents);
+        rvEvent.setAdapter(adapter);
     }
 
     private void delete(int position) {
-        Client client = listOfClients.get(position);
+        Event event = listOfEvents.get(position);
         AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
         alert.setTitle("Delete...");
         alert.setIcon(R.drawable.ic_baseline_cancel_24);
-        alert.setMessage("Confirm " + client.getName() + " client deletion ?");
+        alert.setMessage("Confirm event deletion ?");
         alert.setNeutralButton("CANCEL", null);
         alert.setPositiveButton("YES", (dialogInterface, i) -> {
 
-            reference.child(CLIENTS_COLLECTION_NAME).child(client.getId()).removeValue();
+            reference.child(EVENTS_COLLECTION_NAME).child(event.getEventId()).removeValue();
         });
         alert.show();
     }
 
-    private void loadClients() {
+    private void loadEvents() {
 
-        listOfClients.clear();
+        listOfEvents.clear();
         database = FirebaseDatabase.getInstance();
         reference = database.getReference(URI_DATABASE_AESTHETIC);
-        query = reference.child(CLIENTS_COLLECTION_NAME).orderByChild("name");
+        query = reference.child(EVENTS_COLLECTION_NAME).orderByChild("name");
 
         eventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Client client = new Client();
-                client.setId(snapshot.getKey());
-                client.setName(snapshot.child("name").getValue(String.class));
-                client.setTelephone(snapshot.child("telephone").getValue(String.class));
-                client.setEmail(snapshot.child("email").getValue(String.class));
+                Event event = new Event();
+                event.setEventId(snapshot.getKey());
+                event.setClientId(snapshot.child("idEvent").getValue(String.class));
+                event.setProfessionalId(snapshot.child("idProfessional").getValue(String.class));
+                event.setProductId(snapshot.child("idProduct").getValue(String.class));
 
-                listOfClients.add(client);
+                listOfEvents.add(event);
                 adapter.notifyDataSetChanged();
 
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String idClient = snapshot.getKey();
-                for (Client client : listOfClients) {
-                    if (client.getId().equals(idClient)) {
-                        client.setName(snapshot.child("name").getValue(String.class));
-                        client.setTelephone(snapshot.child("telephone").getValue(String.class));
-                        client.setEmail(snapshot.child("email").getValue(String.class));
+                String idEvent = snapshot.getKey();
+                for (Event event : listOfEvents) {
+                    if (event.getClientId().equals(idEvent)) {
+                        event.setClientId(snapshot.child("clientId").getValue(String.class));
+                        event.setProductId(snapshot.child("productId").getValue(String.class));
+                        event.setProfessionalId(snapshot.child("professionalId").getValue(String.class));
                         adapter.notifyDataSetChanged();
                         break;
                     }
@@ -195,8 +190,8 @@ public class ClientsFragment extends Fragment {
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                String idClient = snapshot.getKey();
-                listOfClients.removeIf(client -> client.getId().equals(idClient));
+                String idEvent = snapshot.getKey();
+                listOfEvents.removeIf(event -> event.getEventId().equals(idEvent));
                 adapter.notifyDataSetChanged();
             }
 
@@ -227,7 +222,7 @@ public class ClientsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        loadClients();
+        loadEvents();
     }
 
     @Override
@@ -235,4 +230,5 @@ public class ClientsFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
 }

@@ -11,12 +11,12 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 
 import br.com.appestetica.databinding.ActivityMainBinding;
 import br.com.appestetica.ui.clients.ClientFormActivity;
+import br.com.appestetica.ui.events.EventsFormActivity;
 import br.com.appestetica.ui.products.ProductsFormActivity;
 import br.com.appestetica.ui.professionals.ProfessionalFormActivity;
 
@@ -36,8 +36,6 @@ public class MainActivity extends AppCompatActivity {
         binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
 
                 String menu = binding.navView.getCheckedItem().toString();
                 if (menu.equals("Clients")){
@@ -55,6 +53,11 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("action", "insert");
                     startActivity(intent);
                 }
+                if (menu.equals("Events")){
+                    Intent intent =  new Intent(MainActivity.this, EventsFormActivity.class);
+                    intent.putExtra("action", "insert");
+                    startActivity(intent);
+                }
 
             }
         });
@@ -67,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
                 R.id.nav_home,
                 R.id.nav_clients,
                 R.id.nav_products,
-                R.id.nav_professionals)
+                R.id.nav_professionals,
+                R.id.nav_events)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);

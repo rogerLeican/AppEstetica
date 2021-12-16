@@ -19,7 +19,4 @@ public class Professional {
     private String telephone;
     private List<LocalDateTime> schedule;
 
-    public Professional(String name) {
-        this.name = name;
-    }
 }

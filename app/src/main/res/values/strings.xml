@@ -12,4 +12,5 @@
     <string name="menu_clients">Clients</string>
     <string name="menu_products">Products</string>
     <string name="menu_professionals">Professionals</string>
+    <string name="menu_events">Events</string>
 </resources>
